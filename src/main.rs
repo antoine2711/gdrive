@@ -134,7 +134,7 @@ enum FileCommand {
         order_by: ListSortOrder,
 
         /// List files in a specific folder
-        #[arg(long, value_name = "DIRECTORY_ID")]
+        #[arg(short, long, value_name = "DIRECTORY_ID")]
         parent: Option<String>,
 
         /// List files on a shared drive
@@ -190,7 +190,7 @@ enum FileCommand {
         mime: Option<Mime>,
 
         /// Upload to an existing directory
-        #[arg(long, value_name = "DIRECTORY_ID")]
+        #[arg(short, long, value_name = "DIRECTORY_ID")]
         parent: Option<Vec<String>>,
 
         /// Upload directories. Note that this will always create a new directory on drive and will not update existing directories with the same name
@@ -255,7 +255,7 @@ enum FileCommand {
         name: String,
 
         /// Create in an existing directory
-        #[arg(long, value_name = "DIRECTORY_ID")]
+        #[arg(short, long, value_name = "DIRECTORY_ID")]
         parent: Option<Vec<String>>,
 
         /// Print only id of folder
@@ -297,7 +297,7 @@ enum FileCommand {
         file_path: PathBuf,
 
         /// Upload to an existing directory
-        #[arg(long, value_name = "DIRECTORY_ID")]
+        #[arg(short, long, value_name = "DIRECTORY_ID")]
         parent: Option<Vec<String>>,
 
         /// Print only id of file
