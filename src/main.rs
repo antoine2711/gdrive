@@ -168,7 +168,7 @@ enum FileCommand {
         follow_shortcuts: bool,
 
         /// Download directories
-        #[arg(long)]
+        #[arg(short, long)]
         recursive: bool,
 
         /// Path where the file/directory should be downloaded to
@@ -194,7 +194,7 @@ enum FileCommand {
         parent: Option<Vec<String>>,
 
         /// Upload directories. Note that this will always create a new directory on drive and will not update existing directories with the same name
-        #[arg(long)]
+        #[arg(short, long)]
         recursive: bool,
 
         /// Set chunk size in MB, must be a power of two.
@@ -245,7 +245,7 @@ enum FileCommand {
         file_id: String,
 
         /// Delete directory and all it's content
-        #[arg(long)]
+        #[arg(short, long)]
         recursive: bool,
     },
 
