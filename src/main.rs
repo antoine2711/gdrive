@@ -122,7 +122,7 @@ enum FileCommand {
     /// List files
     List {
         /// Max files to list
-        #[arg(long, default_value_t = 30)]
+        #[arg(short, long, default_value_t = 30)]
         max: usize,
 
         /// Query. See https://developers.google.com/drive/search-parameters
@@ -198,7 +198,7 @@ enum FileCommand {
         recursive: bool,
 
         /// Set chunk size in MB, must be a power of two.
-        #[arg(long, value_name = "1|2|4|8|16|32|64|128|256|512|1024|4096|8192", default_value_t = ChunkSize::default())]
+        #[arg(short = 's', long, value_name = "1|2|4|8|16|32|64|128|256|512|1024|4096|8192", default_value_t = ChunkSize::default())]
         chunk_size: ChunkSize,
 
         /// Print errors occuring during chunk upload
@@ -227,7 +227,7 @@ enum FileCommand {
         mime: Option<Mime>,
 
         /// Set chunk size in MB, must be a power of two.
-        #[arg(long, value_name = "1|2|4|8|16|32|64|128|256|512|1024|4096|8192", default_value_t = ChunkSize::default())]
+        #[arg(short = 's', long, value_name = "1|2|4|8|16|32|64|128|256|512|1024|4096|8192", default_value_t = ChunkSize::default())]
         chunk_size: ChunkSize,
 
         /// Print errors occuring during chunk upload
