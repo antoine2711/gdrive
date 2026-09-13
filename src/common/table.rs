@@ -47,3 +47,63 @@ fn to_row<T: Display, const COLUMNS: usize>(
 ) -> String {
     columns.map(|c| c.to_string()).join(&config.separator)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_table_write_with_header() {
+        let table = Table {
+            header: ["ID", "NAME"],
+            values: vec![["1", "Alice"], ["2", "Bob"]],
+        };
+        let config = DisplayConfig::default();
+        let mut buffer = Vec::new();
+        write(&mut buffer, table, &config).unwrap();
+        let output = String::from_utf8(buffer).unwrap();
+
+        assert!(output.contains("ID"));
+        assert!(output.contains("NAME"));
+        assert!(output.contains("Alice"));
+        assert!(output.contains("Bob"));
+    }
+
+    #[test]
+    fn test_table_write_skip_header() {
+        let table = Table {
+            header: ["ID", "NAME"],
+            values: vec![["1", "Alice"]],
+        };
+        let config = DisplayConfig {
+            skip_header: true,
+            ..Default::default()
+        };
+        let mut buffer = Vec::new();
+        write(&mut buffer, table, &config).unwrap();
+        let output = String::from_utf8(buffer).unwrap();
+
+        assert!(!output.contains("ID"));
+        assert!(!output.contains("NAME"));
+        assert!(output.contains("Alice"));
+    }
+
+    #[test]
+    fn test_table_write_custom_separator() {
+        let table = Table {
+            header: ["A", "B"],
+            values: vec![["val1", "val2"]],
+        };
+        let config = DisplayConfig {
+            skip_header: false,
+            separator: String::from(","),
+        };
+        let mut buffer = Vec::new();
+        write(&mut buffer, table, &config).unwrap();
+        let output = String::from_utf8(buffer).unwrap();
+
+        assert!(output.contains("A,B"));
+        assert!(output.contains("val1,val2"));
+    }
+}
+

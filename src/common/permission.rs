@@ -106,3 +106,74 @@ impl FromStr for Type {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_role_from_str_valid() {
+        assert_eq!("owner".parse::<Role>(), Ok(Role::Owner));
+        assert_eq!("organizer".parse::<Role>(), Ok(Role::Organizer));
+        assert_eq!("fileOrganizer".parse::<Role>(), Ok(Role::FileOrganizer));
+        assert_eq!("writer".parse::<Role>(), Ok(Role::Writer));
+        assert_eq!("commenter".parse::<Role>(), Ok(Role::Commenter));
+        assert_eq!("reader".parse::<Role>(), Ok(Role::Reader));
+    }
+
+    #[test]
+    fn test_role_from_str_invalid() {
+        assert!("admin".parse::<Role>().is_err());
+        assert!("".parse::<Role>().is_err());
+    }
+
+    #[test]
+    fn test_role_display() {
+        assert_eq!(Role::Owner.to_string(), "owner");
+        assert_eq!(Role::Organizer.to_string(), "organizer");
+        assert_eq!(Role::FileOrganizer.to_string(), "fileOrganizer");
+        assert_eq!(Role::Writer.to_string(), "writer");
+        assert_eq!(Role::Commenter.to_string(), "commenter");
+        assert_eq!(Role::Reader.to_string(), "reader");
+    }
+
+    #[test]
+    fn test_type_from_str_valid() {
+        assert_eq!("user".parse::<Type>(), Ok(Type::User));
+        assert_eq!("group".parse::<Type>(), Ok(Type::Group));
+        assert_eq!("domain".parse::<Type>(), Ok(Type::Domain));
+        assert_eq!("anyone".parse::<Type>(), Ok(Type::Anyone));
+    }
+
+    #[test]
+    fn test_type_from_str_invalid() {
+        assert!("public".parse::<Type>().is_err());
+        assert!("".parse::<Type>().is_err());
+    }
+
+    #[test]
+    fn test_type_display() {
+        assert_eq!(Type::User.to_string(), "user");
+        assert_eq!(Type::Group.to_string(), "group");
+        assert_eq!(Type::Domain.to_string(), "domain");
+        assert_eq!(Type::Anyone.to_string(), "anyone");
+    }
+
+    #[test]
+    fn test_type_rules() {
+        assert!(Type::User.requires_email());
+        assert!(Type::Group.requires_email());
+        assert!(!Type::Domain.requires_email());
+        assert!(!Type::Anyone.requires_email());
+
+        assert!(!Type::User.requires_domain());
+        assert!(!Type::Group.requires_domain());
+        assert!(Type::Domain.requires_domain());
+        assert!(!Type::Anyone.requires_domain());
+
+        assert!(!Type::User.supports_file_discovery());
+        assert!(!Type::Group.supports_file_discovery());
+        assert!(Type::Domain.supports_file_discovery());
+        assert!(Type::Anyone.supports_file_discovery());
+    }
+}

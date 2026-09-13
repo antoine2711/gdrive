@@ -125,7 +125,7 @@ pub async fn list_files(
     Ok(collected_files[0..max_files].to_vec())
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum ListQuery {
     #[default]
     RootNotTrashed,
@@ -177,7 +177,7 @@ impl Display for ListQuery {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum ListSortOrder {
     #[default]
     FolderModifiedName,
@@ -268,3 +268,75 @@ fn truncate_middle(s: &str, max_length: usize) -> String {
 
     vec![head, tail].join("…")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_list_query_from_str() {
+        assert_eq!("".parse::<ListQuery>(), Ok(ListQuery::None));
+        assert_eq!(
+            "name = 'test'".parse::<ListQuery>(),
+            Ok(ListQuery::Custom("name = 'test'".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_list_query_display() {
+        assert_eq!(
+            ListQuery::RootNotTrashed.to_string(),
+            "'root' in parents and trashed = false"
+        );
+        assert_eq!(
+            ListQuery::FilesInFolder {
+                folder_id: "folder123".to_string()
+            }
+            .to_string(),
+            "'folder123' in parents and trashed = false"
+        );
+        assert_eq!(
+            ListQuery::FilesOnDrive {
+                drive_id: "drive456".to_string()
+            }
+            .to_string(),
+            "'drive456' in parents and trashed = false"
+        );
+        assert_eq!(
+            ListQuery::Custom("mimeType = 'folder'".to_string()).to_string(),
+            "mimeType = 'folder'"
+        );
+        assert_eq!(ListQuery::None.to_string(), "");
+    }
+
+    #[test]
+    fn test_list_sort_order_from_str() {
+        assert!("".parse::<ListSortOrder>().is_err());
+        assert_eq!(
+            "name asc".parse::<ListSortOrder>(),
+            Ok(ListSortOrder::Custom("name asc".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_list_sort_order_display() {
+        assert_eq!(
+            ListSortOrder::FolderModifiedName.to_string(),
+            "folder,modifiedTime desc,name"
+        );
+        assert_eq!(
+            ListSortOrder::Custom("quotaBytesUsed desc".to_string()).to_string(),
+            "quotaBytesUsed desc"
+        );
+    }
+
+    #[test]
+    fn test_truncate_middle() {
+        assert_eq!(truncate_middle("hello", 10), "hello");
+        assert_eq!(truncate_middle("hello", 5), "hello");
+        let truncated = truncate_middle("a_very_long_file_name_to_truncate.txt", 20);
+        assert!(truncated.contains('…'));
+        assert_eq!(truncated.chars().count(), 20);
+    }
+}
+

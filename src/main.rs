@@ -725,3 +725,153 @@ fn handle_error(err: impl Error) {
     eprintln!("Error: {}", err);
     std::process::exit(1);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::CommandFactory;
+
+    #[test]
+    fn test_cli_debug_assert() {
+        Cli::command().debug_assert();
+    }
+
+    #[test]
+    fn test_cli_parse_version() {
+        let cli = Cli::try_parse_from(["gdrive", "version"]).unwrap();
+        assert!(matches!(cli.command, Command::Version));
+    }
+
+    #[test]
+    fn test_cli_parse_about() {
+        let cli = Cli::try_parse_from(["gdrive", "about"]).unwrap();
+        assert!(matches!(cli.command, Command::About));
+    }
+
+    #[test]
+    fn test_cli_parse_files_list_defaults() {
+        let cli = Cli::try_parse_from(["gdrive", "files", "list"]).unwrap();
+        match cli.command {
+            Command::Files {
+                command:
+                    FileCommand::List {
+                        max,
+                        skip_header,
+                        full_name,
+                        field_separator,
+                        parent,
+                        drive,
+                        ..
+                    },
+            } => {
+                assert_eq!(max, 30);
+                assert!(!skip_header);
+                assert!(!full_name);
+                assert_eq!(field_separator, "\t");
+                assert_eq!(parent, None);
+                assert_eq!(drive, None);
+            }
+            _ => panic!("Expected FileCommand::List"),
+        }
+    }
+
+    #[test]
+    fn test_cli_parse_files_download() {
+        let cli = Cli::try_parse_from([
+            "gdrive",
+            "files",
+            "download",
+            "file_123",
+            "--overwrite",
+            "--recursive",
+        ])
+        .unwrap();
+
+        match cli.command {
+            Command::Files {
+                command:
+                    FileCommand::Download {
+                        file_id,
+                        overwrite,
+                        recursive,
+                        ..
+                    },
+            } => {
+                assert_eq!(file_id, "file_123");
+                assert!(overwrite);
+                assert!(recursive);
+            }
+            _ => panic!("Expected FileCommand::Download"),
+        }
+    }
+
+    #[test]
+    fn test_cli_parse_files_upload() {
+        let cli = Cli::try_parse_from([
+            "gdrive",
+            "files",
+            "upload",
+            "test.txt",
+            "--recursive",
+            "--parent",
+            "folder_abc",
+        ])
+        .unwrap();
+
+        match cli.command {
+            Command::Files {
+                command:
+                    FileCommand::Upload {
+                        file_path,
+                        recursive,
+                        parent,
+                        ..
+                    },
+            } => {
+                assert_eq!(file_path, Some(PathBuf::from("test.txt")));
+                assert!(recursive);
+                assert_eq!(parent, Some(vec!["folder_abc".to_string()]));
+            }
+            _ => panic!("Expected FileCommand::Upload"),
+        }
+    }
+
+    #[test]
+    fn test_cli_parse_files_mkdir() {
+        let cli = Cli::try_parse_from([
+            "gdrive",
+            "files",
+            "mkdir",
+            "new_folder",
+            "--print-only-id",
+        ])
+        .unwrap();
+
+        match cli.command {
+            Command::Files {
+                command:
+                    FileCommand::Mkdir {
+                        name,
+                        print_only_id,
+                        ..
+                    },
+            } => {
+                assert_eq!(name, "new_folder");
+                assert!(print_only_id);
+            }
+            _ => panic!("Expected FileCommand::Mkdir"),
+        }
+    }
+
+    #[test]
+    fn test_cli_parse_unknown_command() {
+        assert!(Cli::try_parse_from(["gdrive", "invalid_cmd"]).is_err());
+    }
+
+    #[test]
+    fn test_cli_missing_required_arg() {
+        assert!(Cli::try_parse_from(["gdrive", "files", "download"]).is_err());
+        assert!(Cli::try_parse_from(["gdrive", "files", "rename"]).is_err());
+    }
+}
+

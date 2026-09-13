@@ -167,7 +167,7 @@ impl Backoff {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum ChunkSize {
     Approx1,
     Approx2,
@@ -249,5 +249,67 @@ impl Display for ChunkSize {
             ChunkSize::Approx4096 => write!(f, "4096"),
             ChunkSize::Approx8192 => write!(f, "8192"),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_chunk_size_from_str_valid() {
+        let test_cases = [
+            ("1", ChunkSize::Approx1),
+            ("2", ChunkSize::Approx2),
+            ("4", ChunkSize::Approx4),
+            ("8", ChunkSize::Approx8),
+            ("16", ChunkSize::Approx16),
+            ("32", ChunkSize::Approx32),
+            ("64", ChunkSize::Approx64),
+            ("128", ChunkSize::Approx128),
+            ("256", ChunkSize::Approx256),
+            ("512", ChunkSize::Approx512),
+            ("1024", ChunkSize::Approx1024),
+            ("2048", ChunkSize::Approx2048),
+            ("4096", ChunkSize::Approx4096),
+            ("8192", ChunkSize::Approx8192),
+        ];
+
+        for (input, expected) in test_cases {
+            assert_eq!(input.parse::<ChunkSize>().unwrap(), expected);
+        }
+    }
+
+    #[test]
+    fn test_chunk_size_from_str_invalid() {
+        let invalid = ["0", "3", "5", "100", "8193", "abc", ""];
+        for input in invalid {
+            assert!(input.parse::<ChunkSize>().is_err());
+        }
+    }
+
+    #[test]
+    fn test_chunk_size_in_bytes() {
+        assert_eq!(ChunkSize::Approx1.in_bytes(), 1024 * 1024);
+        assert_eq!(ChunkSize::Approx2.in_bytes(), 2 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx4.in_bytes(), 4 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx8.in_bytes(), 8 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx16.in_bytes(), 16 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx32.in_bytes(), 32 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx64.in_bytes(), 64 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx128.in_bytes(), 128 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx256.in_bytes(), 256 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx512.in_bytes(), 512 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx1024.in_bytes(), 1024 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx2048.in_bytes(), 2048 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx4096.in_bytes(), 4096 * 1024 * 1024);
+        assert_eq!(ChunkSize::Approx8192.in_bytes(), 8192 * 1024 * 1024);
+    }
+
+    #[test]
+    fn test_chunk_size_display() {
+        assert_eq!(ChunkSize::Approx1.to_string(), "1");
+        assert_eq!(ChunkSize::Approx32.to_string(), "32");
+        assert_eq!(ChunkSize::Approx8192.to_string(), "8192");
     }
 }
