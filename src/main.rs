@@ -126,7 +126,7 @@ enum FileCommand {
         max: usize,
 
         /// Query. See https://developers.google.com/drive/search-parameters
-        #[arg(long, default_value_t = ListQuery::default())]
+        #[arg(short, long, default_value_t = ListQuery::default())]
         query: ListQuery,
 
         /// Order by. See https://developers.google.com/drive/api/v3/reference/files/list
